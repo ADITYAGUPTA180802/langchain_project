@@ -25,11 +25,8 @@ pre{background:#111;color:#eee;padding:12px;border-radius:8px;white-space:pre-wr
 
     out.textContent = 'Thinking…';
     try {
-      const r = await fetch('/ask', {                     // <-- relative URL
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic })
-      });
+      const r = await fetch('/ask', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ topic }) })
+
       if (!r.ok) {
         const txt = await r.text().catch(()=> '');
         throw new Error(`HTTP ${r.status}${txt ? ' — ' + txt : ''}`);
@@ -45,5 +42,6 @@ pre{background:#111;color:#eee;padding:12px;border-radius:8px;white-space:pre-wr
 
 </body>
 </html>
+
 
 
