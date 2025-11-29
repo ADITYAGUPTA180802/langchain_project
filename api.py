@@ -27,6 +27,9 @@ prompt = ChatPromptTemplate.from_template(
 )
 llm = ChatOpenAI(model=MODEL_NAME, temperature=0.4, api_key=OPENAI_KEY)
 chain = prompt | llm | StrOutputParser()
+@app.get("/routes")
+def routes():
+    return [r.path for r in app.router.routes]
 
 @app.get("/")
 def home():
@@ -48,4 +51,5 @@ def ask(body: AskIn):
         import traceback, sys
         traceback.print_exc(file=sys.stderr)
         raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
+
 
