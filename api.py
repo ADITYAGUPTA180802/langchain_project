@@ -33,7 +33,5 @@ def home():
 
 @app.post("/ask")
 def ask(body: AskIn):
-    topic = (body.topic or "").strip()
-    if not topic:
-        raise HTTPException(400, "topic is required")
-    return {"ok": True, "text": chain.invoke({"topic": topic})}
+return {"ok": True, "text": chain.invoke({"topic": body.topic.strip()})}
+
