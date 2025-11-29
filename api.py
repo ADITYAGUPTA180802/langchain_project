@@ -31,11 +31,21 @@ chain = prompt | llm | StrOutputParser()
 @app.get("/")
 def home():
     return FileResponse("index.html")
-
+@app.get("/health")
+def health():
+    return {"ok": True, "model": MODEL_NAME}
+    
 @app.post("/ask")
 def ask(body: AskIn):
     topic = (body.topic or "").strip()
     if not topic:
         raise HTTPException(status_code=400, detail="topic is required")
-    text = chain.invoke({"topic": topic})
-    return {"ok": True, "text": text}
+    try:
+        text = chain.invoke({"topic": topic})
+        return {"ok": True, "text": text}
+    except Exception as e:
+        # Log full error to Render logs and surface clean info to client
+        import traceback, sys
+        traceback.print_exc(file=sys.stderr)
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
+
