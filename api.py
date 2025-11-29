@@ -16,22 +16,26 @@ if not OPENAI_KEY:
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-# serve static files (so images/css would work if you add them later)
+# Serve static files; index.html should be in repo root
 app.mount("/static", StaticFiles(directory="."), name="static")
 
 class AskIn(BaseModel):
     topic: str
 
-prompt = ChatPromptTemplate.from_template("Write one-line explanation (<=12 words) about: {topic}")
+prompt = ChatPromptTemplate.from_template(
+    "Write one-line explanation (<=12 words) about: {topic}"
+)
 llm = ChatOpenAI(model=MODEL_NAME, temperature=0.4, api_key=OPENAI_KEY)
 chain = prompt | llm | StrOutputParser()
 
-# >>> Serve your page at the ROOT URL <<<
 @app.get("/")
 def home():
-    return FileResponse("index.html")  # index.html must be in repo root
+    return FileResponse("index.html")
 
 @app.post("/ask")
 def ask(body: AskIn):
-return {"ok": True, "text": chain.invoke({"topic": body.topic.strip()})}
-
+    topic = (body.topic or "").strip()
+    if not topic:
+        raise HTTPException(status_code=400, detail="topic is required")
+    text = chain.invoke({"topic": topic})
+    return {"ok": True, "text": text}
