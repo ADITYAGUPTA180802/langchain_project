@@ -18,22 +18,32 @@ pre{background:#111;color:#eee;padding:12px;border-radius:8px;white-space:pre-wr
 </div>
 <pre id="out" style="margin-top:16px;">Result will appear here…</pre>
 <script>
-const API = window.location.origin; // calls your Render API
-document.getElementById('go').onclick = async () => {
-  const topic = document.getElementById('topic').value.trim();
-  const out = document.getElementById('out');
-  if (!topic) return out.textContent = 'Please type a topic.';
-  out.textContent = 'Thinking…';
-  try {
-    const r = await fetch(`${API}/ask`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ topic })
-    });
-    if(!r.ok) throw new Error(await r.text());
-    out.textContent = (await r.json()).text || '(no text)';
-  } catch(e){ out.textContent = 'Error: '+e.message; }
-};
+  document.getElementById('go').onclick = async () => {
+    const topic = document.getElementById('topic').value.trim();
+    const out = document.getElementById('out');
+    if (!topic) { out.textContent = 'Please type a topic.'; return; }
+
+    out.textContent = 'Thinking…';
+    try {
+      const r = await fetch('/ask', {                     // <-- relative URL
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic })
+      });
+      if (!r.ok) {
+        const txt = await r.text().catch(()=> '');
+        throw new Error(`HTTP ${r.status}${txt ? ' — ' + txt : ''}`);
+      }
+      const data = await r.json();
+      out.textContent = data.text || '(no text)';
+    } catch (e) {
+      out.textContent = 'Error: ' + e.message;
+      console.error(e);
+    }
+  };
 </script>
+
 </body>
 </html>
+
 
